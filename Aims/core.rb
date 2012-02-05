@@ -481,17 +481,6 @@ module Aims
       atoms.size
     end
     
-    def nearest_neighbors(point, number=5)
-      unless @tree
-        atomhash = []
-        atoms.each{|a|
-          atomhash << [a.id, [a.x, a.y, a.z]]
-        }
-        @tree = Containers::KDTree.new(atomhash)
-      end
-      @tree.find_nearest(point, number)
-    end
-    
     def bounding_box(visible_only = true)
       maxX = atoms(visible_only).first.x
       maxY = atoms(visible_only).first.y
