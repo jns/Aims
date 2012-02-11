@@ -1,9 +1,11 @@
 
 require 'mathn'
 require 'Aims/vectorize.rb'
-require 'Aims/core.rb'
 require 'Aims/geometry_parser.rb'
 require 'Aims/output.rb'
 require 'Aims/zinc_blende.rb'
 require 'Aims/wurtzite.rb'
-
+require 'Aims/unit_cell.rb'
+require 'Aims/bond.rb'
+require 'Aims/atom.rb'
+require 'Aims/plane.rb'
