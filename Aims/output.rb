@@ -1,8 +1,3 @@
-#!/usr/bin/ruby
-
-require "Aims.rb"
-require 'mathn'
-
 module Aims
   
   class GeometryStep
