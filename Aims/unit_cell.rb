@@ -119,7 +119,7 @@ module Aims
     # of the plane will be invisible.  They are not really gone, but 
     # can be returned by moving or removing the plane
     def add_plane_cartesian(nx, ny, nz, x, y, z)
-      addPlane(Plane.new(normal[0], normal[1], normal[2], x, y, z), true)
+      add_plane(Plane.new(nx, ny, nz, x, y, z), true)
     end
     
     # Clear all clip planes

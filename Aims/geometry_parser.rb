@@ -3,6 +3,10 @@ module Aims
   
   class GeometryParser
         
+    def GeometryParser.parse_string(str)
+      GeometryParser.parse_io(str)
+    end
+    
     def GeometryParser.parse_io(io)
       atoms = Array.new
       vectors = nil

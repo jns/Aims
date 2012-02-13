@@ -59,8 +59,8 @@ module Aims
     def get_111B_surface(monolayers, vacuum)
 
       # The atoms on a FCC 
-      as1 = Atom.new(0.0, 0.0, 0.0,'As')
-      ga1 = Atom.new(0.0, 0.0, -sqrt(3)/4*self.lattice_const, 'Ga')
+      as1 = Atom.new(0.0, 0.0, 0.0, self.cation)
+      ga1 = Atom.new(0.0, 0.0, -sqrt(3)/4*self.lattice_const, self.anion)
 
       # The lattice Vectors
       v1 = Vector[0.5*sqrt(2), 0.0, 0.0]*self.lattice_const
