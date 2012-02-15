@@ -16,13 +16,41 @@ module Aims
       @a = a
       @b = b
       @c = c
+      if (@a == 0 and @b == 0 and @c == 0)
+        raise "Invalid definition of plane."
+      end
       @d = a*x + b*y + c*z
     end
 
+    # return some arbitrary point on the plane
+    def any_point_on_plane
+      
+      unless (@c == 0)
+        return Vector[0, 0, @d/@c]
+      end
+      
+      unless (@b == 0)
+        return Vector[0, @d/@b, 0]
+      end
+      
+      unless (@a == 0)
+        return Vector[@d/@a, 0, 0]
+      end
+      
+      # Actually if we get to this point, the plane undetermined and all of R3 satisfies the definition
+      return Vector[0,0,0]
+    end
+    
     # The distance to a point (x,y,z) is
     # D - Ax - By - Cz
     def distance_to_point(x, y, z)
       a*x + b*y + c*z - d
+    end
+    
+    # Return the unit normal
+    def unit_normal
+      v = Vector[@a, @b, @c]
+      v*(1/v.r)
     end
     
     # The equation for the interstion of a ray and a plane

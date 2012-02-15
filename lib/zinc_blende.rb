@@ -7,6 +7,7 @@ module Aims
   class ZincBlende
 
     include Math
+    include Vectorize
     
     attr_accessor :lattice_const, :cation, :anion
 
@@ -37,6 +38,43 @@ module Aims
       zb.set_miller_indices(millerx, millery, millerz)
       
       return zb
+    end
+
+    # Fill the given volume with atoms
+    def fill_volume(volume)
+      
+      # First fill a cube that bounds the volume
+      max = volume.max_point
+      min = volume.min_point
+      
+      dx = max[0] - min[0]
+      dy = max[1] - min[1]
+      dz = max[2] - min[2]
+      
+      bulk = get_bulk
+      
+      # This inverse matrix gives the number of repetitions 
+      m = Matrix[[dx,0,0], [0,dy,0], [0,0,dz]]
+      v = Matrix[bulk.lattice_vectors[0].to_a, 
+                 bulk.lattice_vectors[1].to_a,
+                 bulk.lattice_vectors[2].to_a]
+      rep_mat = m*(v.inverse)
+      
+      # The only way I can figure out how to do this for an 
+      # arbitrary set of lattice vectors is to fill the volume
+      # out along each edge of the super-cube and then eliminate duplicates
+      atoms = []
+      3.times do |i|
+        # this vector is the number of repetitions in the unit cell
+        # to fill the volume out along the i-th edge of the super-cube
+        n_repeat = rep_mat.row(i)
+        nx = (n_repeat[0] < 0) ? n_repeat[0].floor-1 : n_repeat[0].ceil+1
+        ny = (n_repeat[1] < 0) ? n_repeat[1].floor-1 : n_repeat[1].ceil+1
+        nz = (n_repeat[2] < 0) ? n_repeat[2].floor-1 : n_repeat[2].ceil+1
+        
+        atoms += bulk.repeat(nx, ny, nz).atoms.find_all{|a| volume.contains_point(a.x, a.y, a.z)}
+      end
+      UnitCell.new(atoms.uniq)
     end
 
     # Return a unit cell for a slab of 001 

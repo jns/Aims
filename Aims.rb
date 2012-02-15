@@ -11,4 +11,5 @@ require "#{dir}/Aims/unit_cell.rb"
 require "#{dir}/Aims/bond.rb"
 require "#{dir}/Aims/atom.rb"
 require "#{dir}/Aims/plane.rb"
+require "#{dir}/Aims/volume.rb"
 
