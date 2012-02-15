@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.author = "Joshua Shapiro"
   s.email = "joshua.shapiro@gmail.com"
   s.description = "Support for generation and parsing of input and output files for FHI-AIMS DFT package"
-  s.files = Dir.glob("lib/**/*.rb") + %w(README)
+  s.files = Dir.glob("{bin,lib}/**/*.rb") + %w(README)
   s.homepage = "https://github.com/jns/Aims"
   s.name = "aims"
   s.require_path = 'lib'
@@ -11,4 +11,5 @@ Gem::Specification.new do |s|
   and parsing output files for the FHI-AIMS DFT code.
 EOF
   s.version = "0.1.0"
+  s.executables = ["aims_output.rb", "aims_summary.rb"]
 end

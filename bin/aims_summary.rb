@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'Aims.rb'
+require 'aims'
 files = ARGV
 STDOUT.sync = true
 puts ["RUN", "FILE", "TOTAL_ENERGY", "NUM_ATOMS", "K-GRID", "CONVERGED", "RELAXATION_STEPS", "SC_ITERATIONS","TOTAL_TIME"].join("\t")
