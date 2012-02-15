@@ -7,7 +7,6 @@ module Aims
   class ZincBlende
 
     include Math
-    include Vectorize
     
     attr_accessor :lattice_const, :cation, :anion
 

@@ -4,8 +4,8 @@ module Aims
 
   class UnitCell
 
-    include Vectorize
     include Enumerable
+    
     attr_accessor :lattice_vectors
 	  attr_accessor :bonds
 	
@@ -344,7 +344,7 @@ negative direction of the lattice vectors
 =end
     def repeat(nx=1, ny=1, nz=1)
       
-      throw "Not a periodic system." if self.lattice_vectors.nil?
+      raise "Not a periodic system." if self.lattice_vectors.nil?
       
       u = self.copy
       v1 = self.lattice_vectors[0]
