@@ -79,21 +79,21 @@ module Aims
     # Return a unit cell for a slab of 001 
     # Specify the number of atomic monolayers 
     # and the vacuum thickness in angstrom
-    def get_001_surface(monolayers, vacuum)
-      
+    def get_001_surface(monolayers, vacuum, constrain_layers = 0)
+      raise "get_001_surface is not implememnted yet"
     end
 
     # Return a unit cell for a slab of 111A (anion terminated)
     # specify the number of atomic monolayers 
     # and the vacuum thickness in angstrom
-    def get_111A_surface(monolayers, vacuum)
-
+    def get_111A_surface(monolayers, vacuum, constrain_layers = 0)
+      raise "get_111A_surface is not implemented yet"
     end
 
     # Return a unit cell for a slab of 111B (cation terminated)
     # specify the number of atomic monolayers 
     # and the vacuum thickness in angstrom
-    def get_111B_surface(monolayers, vacuum)
+    def get_111B_surface(monolayers, vacuum, constrain_layers = 0)
 
       # The atoms on a FCC 
       as1 = Atom.new(0.0, 0.0, 0.0, self.cation)
@@ -116,18 +116,31 @@ module Aims
 
       # Repeat the unit cell and add vacuum
       if 0 < vacuum 
-        layers = 9
-        zb = zb.repeat(1,1,monolayers)
+        # We actually repeat the unit cell monolayers+1 times because
+        # I will strip off the top and bottom atoms to make the proper surface
+        zb = zb.repeat(1,1,monolayers+1)
+        
         bilayerSep = v3[2]
-
         zb.lattice_vectors[2] = Vector[0, 0, monolayers*bilayerSep + vacuum]
 
-        # Constrain the bottom 2 layers
-        # zb.atoms.each{|a|
-        #   if (a.z < bilayerSep*2.0)
-        #     a.constrain = ".true."
-        #   end
-        # }
+        # Strip off the top and bottom atom
+        minZ = zb.atoms.min{|a,b| a.z <=> b.z}.z
+        maxZ = zb.atoms.max{|a,b| a.z <=> b.z}.z
+
+        zb.atoms.reject!{|a| a.z == maxZ}
+        zb.atoms.reject!{|a| a.z == minZ}
+
+        # Constrain the bottom layers if requested
+        if 0 < constrain_layers
+          # get the min again because we removed the atoms at minZ above
+          minZ = zb.atoms.min{|a,b| a.z <=> b.z}.z
+          constrain_below = minZ + bilayerSep.abs*constrain_layers
+          zb.atoms.each{|a|
+            if (a.z < constrain_below)
+              a.constrain = ".true."
+            end
+          }
+        end
       end
       
       zb
@@ -135,7 +148,7 @@ module Aims
 
     # return a unit cell for a slab of 112 
     # specify the number of atomic monolayers and the vacuum thickness in angstrom
-    def get_112_surface(monolayers, vacuum=0)
+    def get_112_surface(monolayers, vacuum=0, constrain_layers = 0)
       atom1 = Atom.new(0,0,0,self.cation)
       atom2 = Atom.new(self.lattice_const*sqrt(3)/2, 0, 0, self.anion)
       
@@ -178,7 +191,7 @@ module Aims
     # Return a unit cell for a slab of 110
     # specify the number of atomic monolayers 
     # and the vacuum thickness in angstrom
-    def get_110_surface(monolayers, vacuum=0)
+    def get_110_surface(monolayers, vacuum=0, constrain_layers = 0)
 
       # The atoms on a FCC 
       atom1 = Atom.new(0,0,0,self.cation)
