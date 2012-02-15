@@ -5,6 +5,8 @@ module Aims
 # 
   class Volume
   
+    include Vectorize
+    
     # Quick recursive method for calculating combinations
     def Volume.choose(list, num, head = [])
 

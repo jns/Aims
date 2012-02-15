@@ -6,6 +6,7 @@ module Aims
 # of specified thickness and with the specified vacuum. 
   class ZincBlende
 
+    include Vectorize
     include Math
     
     attr_accessor :lattice_const, :cation, :anion

@@ -1,9 +1,8 @@
-
-
 module Aims
 
   class UnitCell
 
+    include Vectorize
     include Enumerable
     
     attr_accessor :lattice_vectors
@@ -500,5 +499,4 @@ return a string in xyz format
     end
 
   end
-  
 end
