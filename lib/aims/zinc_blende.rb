@@ -88,7 +88,10 @@ module Aims
     # specify the number of atomic monolayers 
     # and the vacuum thickness in angstrom
     def get_111A_surface(monolayers, vacuum, constrain_layers = 0)
-      raise "get_111A_surface is not implemented yet"
+      # get the 111B surface, then reflect it about z=0
+      surface = get_111B_surface(monolayers, vacuum, constrain_layers)
+      surface.atoms.each{|a| a.z = -a.z}
+      return surface
     end
 
     # Return a unit cell for a slab of 111B (cation terminated)
@@ -122,7 +125,7 @@ module Aims
         zb = zb.repeat(1,1,monolayers+1)
         
         bilayerSep = v3[2]
-        zb.lattice_vectors[2] = Vector[0, 0, monolayers*bilayerSep + vacuum]
+        zb.lattice_vectors[2] = Vector[0, 0, monolayers*(bilayerSep.abs) + vacuum]
 
         # Strip off the top and bottom atom
         minZ = zb.atoms.min{|a,b| a.z <=> b.z}.z
