@@ -4,6 +4,10 @@ module Aims
 
 # Factory class for generating slabs for various crystal surfaces
 # of specified thickness and with the specified vacuum. 
+# Example:
+#   zb = ZincBlende.new("Ga", "As", 5.65)
+#   zb.get_bulk -> # returns the a unit cell with two atoms
+#   zb.get_111B_surface(7, 20, 3) # returns a slab of 111B 7 monolayers thick, with 20 angstrom of vacuum, and the bottom 3 layers constrained
   class ZincBlende
 
     include Vectorize
@@ -21,6 +25,7 @@ module Aims
       self.anion = anion
     end
     
+    # Return the traditional unit cell of bulk zinc blende
     def get_bulk
       b = 0.25*self.lattice_const
       a1 = Atom.new(0, 0, 0, self.cation)
@@ -78,30 +83,82 @@ module Aims
     end
 
     # Return a unit cell for a slab of 001 
-    # Specify the number of atomic monolayers 
-    # and the vacuum thickness in angstrom
+    # Specify the number of atomic monolayers,
+    # the vacuum thickness in angstrom,
+    # and the number of layers to constrain at the base of the slab
     def get_001_surface(monolayers, vacuum, constrain_layers = 0)
-      raise "get_001_surface is not implememnted yet"
+      anion = Atom.new(0,0,0,self.cation)
+      cation = Atom.new(0.25*self.lattice_const, 0.25*self.lattice_const, 0.25*self.lattice_const, self.anion)
+      v1 = Vector[0.5, 0.5, 0]*self.lattice_const
+      v2 = Vector[-0.5,0.5,0]*self.lattice_const
+      v3 = Vector[0.5, 0, 0.5]*self.lattice_const
+      
+      uc = UnitCell.new([anion, cation], [v1,v2,v3])
+      millerX = [1,0,0]
+      millerY = [0,1,0]
+      millerZ = [0,0,1]
+      uc.set_miller_indices(millerX, millerY, millerZ)
+      
+
+      # Repeat the unit cell.  The unit cell is a bi-layer so divide by 2
+      zb = zb.repeat(1,1,(monolayers/2).ceil)
+
+      if 0 < vacuum
+        # Add vacuum
+        monolayerSep = v3[2]/2
+        zb.lattice_vectors[2] = Vector[0, 0, monolayers*monolayerSep.abs + vacuum.to_f]
+        # Move everything into a nice tidy unit cell. 
+        zb = zb.correct
+      end
+
+      # # Constrain the bottom layers
+      zb.atoms.each{|a|
+        if (a.z < monolayerSep*constrain_layers)
+          a.constrain = ".true."
+        end
+      }
+
+      
+      # Return the completed unit cell
+      return zb
     end
 
     # Return a unit cell for a slab of 111A (anion terminated)
-    # specify the number of atomic monolayers 
-    # and the vacuum thickness in angstrom
+    # specify the number of atomic monolayers,
+    # the vacuum thickness in angstrom,
+    # and the number of layers to constrain at the base of the slab
     def get_111A_surface(monolayers, vacuum, constrain_layers = 0)
       # get the 111B surface, then reflect it about z=0
-      surface = get_111B_surface(monolayers, vacuum, constrain_layers)
-      surface.atoms.each{|a| a.z = -a.z}
-      return surface
+      get_111_surface("A", monolayers, vacuum, constrain_layers)
     end
 
-    # Return a unit cell for a slab of 111B (cation terminated)
+    # Return a unit cell for a slab of 111A (cation terminated)
+    # specify the number of atomic monolayers,
+    # the vacuum thickness in angstrom,
+    # and the number of layers to constrain at the base of the slab
+    def get_111B_surface(monolayers, vacuum, constrain_layers = 0)
+      get_111_surface("B", monolayers, vacuum, constrain_layers)
+    end
+
+    # Return a unit cell for a slab of 111
+    # dir is either "A" or "B" for the cation or anion terminated slab
     # specify the number of atomic monolayers 
     # and the vacuum thickness in angstrom
-    def get_111B_surface(monolayers, vacuum, constrain_layers = 0)
+    def get_111_surface(dir, monolayers, vacuum, constrain_layers = 0)
 
+      if dir == "A"
+        top_atom = self.anion
+        bot_atom = self.cation
+      elsif dir == "B"
+        top_atom = self.cation
+        bot_atom = self.anion
+      else
+        raise "Direction must be either A or B"
+      end
+      
       # The atoms on a FCC 
-      as1 = Atom.new(0.0, 0.0, 0.0, self.cation)
-      ga1 = Atom.new(0.0, 0.0, -sqrt(3)/4*self.lattice_const, self.anion)
+      as1 = Atom.new(0.0, 0.0, 0.0, top_atom)
+      ga1 = Atom.new(0.0, 0.0, -sqrt(3)/4*self.lattice_const, bot_atom)
 
       # The lattice Vectors
       v1 = Vector[0.5*sqrt(2), 0.0, 0.0]*self.lattice_const
@@ -192,6 +249,7 @@ module Aims
        return zb
     end
     
+    
     # Return a unit cell for a slab of 110
     # specify the number of atomic monolayers 
     # and the vacuum thickness in angstrom
@@ -222,17 +280,17 @@ module Aims
       if 0 < vacuum
         # Add vacuum
         monolayerSep = v3[2]
-        zb.lattice_vectors[2] = Vector[0, 0, monolayers*monolayerSep + vacuum.to_f]
+        zb.lattice_vectors[2] = Vector[0, 0, monolayers*monolayerSep.abs + vacuum.to_f]
         # Move everything into a nice tidy unit cell. 
         zb = zb.correct
       end
 
-      # # Constrain the bottom 2 layers
-      # zb.atoms.each{|a|
-      #   if (a.z < monolayerSep*2)
-      #     a.constrain = ".true."
-      #   end
-      # }
+      # # Constrain the bottom layers
+      zb.atoms.each{|a|
+        if (a.z < monolayerSep*constrain_layers)
+          a.constrain = ".true."
+        end
+      }
 
       
       # Return the completed unit cell
