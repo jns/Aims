@@ -93,13 +93,12 @@ module Aims
       v2 = Vector[-0.5,0.5,0]*self.lattice_const
       v3 = Vector[0.5, 0, 0.5]*self.lattice_const
       
-      uc = UnitCell.new([anion, cation], [v1,v2,v3])
+      zb = UnitCell.new([anion, cation], [v1,v2,v3])
       millerX = [1,0,0]
       millerY = [0,1,0]
       millerZ = [0,0,1]
-      uc.set_miller_indices(millerX, millerY, millerZ)
+      zb.set_miller_indices(millerX, millerY, millerZ)
       
-
       # Repeat the unit cell.  The unit cell is a bi-layer so divide by 2
       zb = zb.repeat(1,1,(monolayers/2).ceil)
 
@@ -111,13 +110,20 @@ module Aims
         zb = zb.correct
       end
 
-      # # Constrain the bottom layers
+      minZ = zb.atoms.min{|a,b| a.z <=> b.z}.z
+      
+      # Reject the top layer of atoms if an odd number of monolayers was requested.
+      # This is necessary because the primitive cell is a bilayer
+      zb.atoms.reject! {|a| 
+        a.z >= (minZ + monolayerSep.abs*monolayers)
+      }
+      
+      # Constrain the bottom layers
       zb.atoms.each{|a|
-        if (a.z < monolayerSep*constrain_layers)
+        if (a.z < minZ + monolayerSep.abs*constrain_layers)
           a.constrain = ".true."
         end
       }
-
       
       # Return the completed unit cell
       return zb

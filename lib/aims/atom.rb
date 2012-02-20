@@ -14,6 +14,23 @@ module Aims
       self.id = (@@lastid +=1)
       self.constrain = c
     end
+    
+    def constrained?
+      if self.constrain
+        if self.constrain == true
+          true
+        elsif self.constrain.is_a? String
+          true
+        elsif self.constrain.is_a? Array and not self.constrain.empty?
+          true
+        else
+          false
+        end
+      else
+        false
+      end
+    end
+    
 =begin
   Two atoms are equal if their coordinates are equal and they are the same species
 =end
