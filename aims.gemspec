@@ -12,5 +12,5 @@ Gem::Specification.new do |s|
 EOF
   s.version = "0.1.0"
   s.executables = ["aims_output.rb", "aims_summary.rb"]
-  s.test_files = Dir.glob("tests/test-suite.rb")
+  s.test_files = Dir.glob("spec/*.rb")
 end
