@@ -73,6 +73,8 @@ module Aims
         # this vector is the number of repetitions in the unit cell
         # to fill the volume out along the i-th edge of the super-cube
         n_repeat = rep_mat.row(i)
+        
+        # Give the proper sign to the repeat
         nx = (n_repeat[0] < 0) ? n_repeat[0].floor-1 : n_repeat[0].ceil+1
         ny = (n_repeat[1] < 0) ? n_repeat[1].floor-1 : n_repeat[1].ceil+1
         nz = (n_repeat[2] < 0) ? n_repeat[2].floor-1 : n_repeat[2].ceil+1

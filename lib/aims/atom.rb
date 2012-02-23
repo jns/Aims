@@ -3,14 +3,17 @@ module Aims
   class Atom
     @@lastid = 0
 
-    attr_accessor :x, :y, :z, :id, :species, :constrain
+    attr_accessor :x, :y, :z, :id, :species, :constrain, :precision
     include Enumerable
     
+    # Create an atom
+    # units are in angstrom.  all values are rounded to nearest 0.000001 AA
     def initialize(x=nil, y=nil, z=nil, s=nil, c=Array.new)
       self.x = x
       self.y = y
       self.z = z
       self.species = s
+      self.precision = 0.0001
       self.id = (@@lastid +=1)
       self.constrain = c
     end
@@ -35,9 +38,26 @@ module Aims
   Two atoms are equal if their coordinates are equal and they are the same species
 =end
 	def ==(atom)
-		(self.x == atom.x) & (self.y == atom.y) & (self.z == atom.z) & (self.species == atom.species)
+		((self.x-atom.x).abs < self.precision) & 
+		((self.y-atom.y).abs < self.precision) & 
+		((self.z-atom.z).abs < self.precision) & 
+		(self.species == atom.species)
 	end
-
+  
+=begin
+  Impelmentation of Hash for equality testing
+=end
+  def eql?(atom)
+    self == atom
+  end
+  
+=begin
+  Implementation for Hash equality testing
+=end
+  def hash
+    (self.x*self.y + self.z).abs.ceil
+  end
+  
     def each
       [self.x, self.y, self.z].each{|i| yield i}
     end

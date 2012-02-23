@@ -493,6 +493,7 @@ return a string in xyz format
           end
         end
       end
+      new_unit_cell.atoms.uniq!
       new_unit_cell.make_bonds
       return new_unit_cell
 
