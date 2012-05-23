@@ -12,6 +12,8 @@ module Aims
       vectors = nil
       io.each_line{|line|
         case line
+        when /\w*#.*/
+          # Comment line, Do nothing
         when /atom/
           a, x, y, z, species = line.split(' ')
 		  atom = Atom.new(x.to_f,y.to_f,z.to_f,species)
