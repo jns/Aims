@@ -1,0 +1,52 @@
+Copyright (c) Joshua Shapiro 2012
+
+== What is the Aims Gem?
+
+The Aims gem is a ruby interface to the FHI-Aims ab-initio molecular simulation package published by the Fritz-Haber Institute [https://aimsclub.fhi-berlin.mpg.de/]. It provides a set of tools for parsing and generating the input and output geometry and control files for AIMS. 
+
+== Why should I use the Aims Gem?
+
+If you like Ruby, and you like AIMS, then this gem provides you with a pure Ruby object-oriented interface to AIMS.  You can use this library to: 
+
+* Simplify the generation of complex geometries
+* Automate the generation of geometry and control files
+* Parse the output of Aims into ruby objects for analysis
+* Summarize the output of AIMS using simple scripts that come with the gem
+* Whatever else you can imagine..
+
+== Installation
+
+To use this gem, you will need to have an installation of ruby.  If you own a mac or a linux machine, then you already have ruby.  If you have a windows machine, then you need to install ruby.  The recommended way to install Ruby on windows (as of June 2012) is via http://rubyinstaller.org .
+
+Once you have ruby, then just invoke the following from a terminal window.
+
+  gem install aims
+ 
+== Using the Aims gem to generate geometry.in files
+
+The following code can be used interactively in an +irb+ ruby interpreter, or can be
+invoked in a ruby script.
+
+=== Example 1: Generate a primitive unit cell of Silicon
+
+  require 'aims'
+  include Aims
+
+  # Define the lattice constant
+  lattice_const = 5.43
+  
+  # Define the basis
+  a1 = Atom.new(0,0,0, "Si")
+  a2 = Atom.new(lattice_const/4, lattice_const/4, lattice_const/4, "Si")
+  
+  # Define the primitive vectors
+  v1 = [lattice_const/2, lattice_const/2, 0]
+  v2 = [lattice_const/2, 0, lattice_const/2]
+  v3 = [0, lattice_const/2, lattice_const/2]
+
+  # Define the unit cell
+  uc = UnitCell.new([a1, a2], [v1, v2, v3])
+
+  # Output the unit cell
+  puts uc.format_geometry_in
+

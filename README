@@ -1,8 +1,0 @@
-copyright Joshua Shapiro 2012
-
-This project serves as a ruby interface to the FHI-Aims ab-initio molecular simulation package. It provides a set of tools for parsing and generating the input and output files for AIMS. 
-
-In addition there are tools for generating crystal geometries and slicing those crystals along arbitrary planes defined by their miller index.  
-
-
-
