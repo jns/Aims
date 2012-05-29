@@ -181,22 +181,48 @@ module Aims
       Geometry.new(atoms)
     end
 
+    def OutputParser.parse_atom_frac(line)
+      nil
+    end
+    
+    def OutputParser.parse_atom(line)
+      fields = line.split(' ')
+      a = Atom.new
+      a.x, a.y, a.z = fields[1].to_f, fields[2].to_f, fields[3].to_f
+      a.species = fields[4]
+      a
+    end
+
+    def OutputParser.parse_lattice_vector(line)
+      fields = line.split(' ')
+      [fields[1].to_f, fields[2].to_f, fields[3].to_f]      
+    end
+
     def OutputParser.parse_updated_geometry(io, n_atoms)
       io.readline
+      
       vectors = []
-      3.times do 
-        fields = io.readline.split(' ')
-        vectors << [fields[1].to_f, fields[2].to_f, fields[3].to_f]
-      end
-      io.readline
       atoms = []
-      n_atoms.times do 
-        fields = io.readline.split(' ')
-        a = Atom.new
-        a.x, a.y, a.z = fields[1].to_f, fields[2].to_f, fields[3].to_f
-        a.species = fields[4]
-        atoms << a
-      end
+      continue = TRUE
+      
+      begin
+        line = io.readline
+        case line
+        when /lattice_vector/
+          vectors << OutputParser.parse_lattice_vector(line)
+        when /atom\b/
+          atoms << OutputParser.parse_atom(line)
+        when /atom_frac/
+          OutputParser.parse_atom_frac(line)
+        when /^\s*$/
+          # do nothing
+        else 
+          continue = FALSE
+        end
+      end while continue 
+      
+      vectors = nil if vectors.empty?
+      
       Geometry.new(atoms, vectors)
     end
     
