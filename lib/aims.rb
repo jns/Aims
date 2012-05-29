@@ -25,8 +25,11 @@ require 'aims/bond.rb'
 require 'aims/geometry_parser.rb'
 require 'aims/output.rb'
 require 'aims/plane.rb'
-require 'aims/unit_cell.rb'
+require 'aims/geometry.rb'
 require 'aims/volume.rb'
 require 'aims/wurtzite.rb'
 require 'aims/zinc_blende.rb'
 
+# :include:README.rdoc
+module Aims
+end

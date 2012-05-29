@@ -15,7 +15,7 @@ module Aims
     
     attr_accessor :lattice_const, :cation, :anion
 
-    # Initialize the zinc-blende UnitCell
+    # Initialize the zinc-blende Geometry
     # cation and anion are the  atomic 
     # species occupying the two different sub-lattices.
     # lattice_const specifies the lattice constant
@@ -34,7 +34,7 @@ module Aims
       v1 = Vector[0.5, 0.5, 0.0]*self.lattice_const
       v2 = Vector[0.5, 0.0, 0.5]*self.lattice_const
       v3 = Vector[0.0, 0.5, 0.5]*self.lattice_const
-      zb = UnitCell.new([a1, a2], [v1, v2, v3])
+      zb = Geometry.new([a1, a2], [v1, v2, v3])
       
       millerx = [1, 0, 0]
       millery = [0, 1, 0]
@@ -81,7 +81,7 @@ module Aims
         
         atoms += bulk.repeat(nx, ny, nz).atoms.find_all{|a| volume.contains_point(a.x, a.y, a.z)}
       end
-      UnitCell.new(atoms.uniq)
+      Geometry.new(atoms.uniq)
     end
 
     # Return a unit cell for a slab of 001 
@@ -95,7 +95,7 @@ module Aims
       v2 = Vector[-0.5,0.5,0]*self.lattice_const
       v3 = Vector[0.5, 0, 0.5]*self.lattice_const
       
-      zb = UnitCell.new([anion, cation], [v1,v2,v3])
+      zb = Geometry.new([anion, cation], [v1,v2,v3])
       millerX = [1,0,0]
       millerY = [0,1,0]
       millerZ = [0,0,1]
@@ -130,6 +130,8 @@ module Aims
       # Return the completed unit cell
       return zb
     end
+    alias_method :get_100_surface, :get_001_surface
+    alias_method :get_010_surface, :get_001_surface
 
     # Return a unit cell for a slab of 111A (anion terminated)
     # specify the number of atomic monolayers,
@@ -174,7 +176,7 @@ module Aims
       v3 = Vector[sqrt(2)*0.25, sqrt(2.0/3.0)*0.25, -1*sqrt(4.0/3.0)*0.5]*self.lattice_const
 
       # The unit cell
-      zb = UnitCell.new([as1, ga1], [v1, v2, v3])
+      zb = Geometry.new([as1, ga1], [v1, v2, v3])
 
       # The Miller Indices
       millerX = [-1, 1, 0]  # Orientation of the crystal pointing in the cartesian +x axis
@@ -230,7 +232,7 @@ module Aims
       millerZ = Vector[-1, -1, -1]
 
       # The unit cell
-       zb = UnitCell.new([atom1, atom2], [v1, v2, v3])
+       zb = Geometry.new([atom1, atom2], [v1, v2, v3])
        zb.set_miller_indices(millerX, millerY, millerZ)
 
        # Repeat the unit cell
@@ -278,7 +280,7 @@ module Aims
       millerZ = Vector[1, 1, 0]
 
       # The unit cell
-      zb = UnitCell.new([atom1, atom2], [v1, v2, v3])
+      zb = Geometry.new([atom1, atom2], [v1, v2, v3])
       zb.set_miller_indices(millerX, millerY, millerZ)
 
       # Repeat the unit cell

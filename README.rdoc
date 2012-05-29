@@ -1,14 +1,18 @@
-Copyright (c) Joshua Shapiro 2012
 
 == What is the Aims Gem?
 
-The Aims gem is a ruby interface to the FHI-Aims ab-initio molecular simulation package published by the Fritz-Haber Institute [https://aimsclub.fhi-berlin.mpg.de/]. It provides a set of tools for parsing and generating the input and output geometry and control files for AIMS. 
+The Aims gem is a ruby interface to the FHI-Aims ab-initio molecular simulation package published by the Fritz-Haber Institute [https://aimsclub.fhi-berlin.mpg.de/]. It provides a set of tools for parsing and generating the input and output files for AIMS. 
+
+The aims gem is written by Joshua Shapiro and release under the MIT license.
+
+Copyright (c) Joshua Shapiro 2012
 
 == Why should I use the Aims Gem?
 
 If you like Ruby, and you like AIMS, then this gem provides you with a pure Ruby object-oriented interface to AIMS.  You can use this library to: 
 
 * Simplify the generation of complex geometries
+  * Bulk and common surface geometries of ZincBlende and Wurtzite are predefined.
 * Automate the generation of geometry and control files
 * Parse the output of Aims into ruby objects for analysis
 * Summarize the output of AIMS using simple scripts that come with the gem
@@ -45,8 +49,27 @@ invoked in a ruby script.
   v3 = [0, lattice_const/2, lattice_const/2]
 
   # Define the unit cell
-  uc = UnitCell.new([a1, a2], [v1, v2, v3])
+  uc = Geometry.new([a1, a2], [v1, v2, v3])
 
   # Output the unit cell
   puts uc.format_geometry_in
 
+=== Example 2: Shortcut for generating a primitive unit cell of Zinc-Blende
+
+  require 'aims'
+  include Aims
+  
+  zb = ZincBlende.new("Ga", "As", 5.65)
+  
+  # Get the bulk geometry
+  puts zb.get_bulk.format_geometry_in
+
+And here is how you get a (100) surface with 7 layers and 20 angstrom of vacuum 
+  layers = 7
+  vacuum = 20
+  puts zb.get_001_surface(layers, vacuum)
+  
+And here is how you can constrain the bottom three layers
+  constrain = 3
+  puts zb.get_001_surface(layers, vacuum, constrain)
+  

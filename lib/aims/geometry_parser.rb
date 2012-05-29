@@ -1,12 +1,21 @@
 
 module Aims
   
+  # Utility class for parsing an Aims geometry file
+  # Example Usage:
+  #  uc = Aims::GeometryParser.parse("geometry.in")
   class GeometryParser
-        
+    
+    # Parse a String representation of a geometry.in file
+    # - +str+ The String to parse
+    # - Return the Aims::Geometry object that was parsed
     def GeometryParser.parse_string(str)
       GeometryParser.parse_io(str)
     end
     
+    # Parse an IO object representation of a geometry.in file
+    # - +io+ The IO object to parse
+    # - Return the Aims::Geometry object that was parsed
     def GeometryParser.parse_io(io)
       atoms = Array.new
       vectors = nil
@@ -27,9 +36,12 @@ module Aims
           atoms.last.constrain << c
         end
       }
-      UnitCell.new(atoms, vectors)
+      Geometry.new(atoms, vectors)
     end
 
+    # Parse a geometry.in file
+    # - +filename+ the file to parse
+    # - return the Aims::Geometry object
     def GeometryParser.parse(filename)
       f = File.open(filename, 'r')
       cell = GeometryParser.parse_io(f)

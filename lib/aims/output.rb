@@ -1,26 +1,49 @@
 module Aims
-  
-  class GeometryStep
-    attr_reader :sc_iterations
-    attr_accessor :geometry, :total_energy, :total_corrected_energy, :chemical_potential, :forces
 
+  # A geometry relaxation step in the calculation
+  class GeometryStep
+
+    # An Array of self-consistency iterations
+    attr_reader :sc_iterations
+
+    # The geometry
+    attr_accessor :geometry
+
+    # The total energy for this geometry
+    attr_accessor :total_energy
+
+    # The total corrected energy for this geometry
+    attr_accessor :total_corrected_energy
+    
+    # The chemical potential for this geometry
+    attr_accessor :chemical_potential
+    
+    # The forces for this geometry
+    attr_accessor :forces
+
+    # Initialize a new geometry step
     def initialize
       @sc_iterations = Array.new
       @forces = Array.new
     end
 
+    # Return the last self-consistency iteration for this relaxation step
     def sc_iteration
       self.sc_iterations.last
     end
 
+    # Return the total energy per atom for this relaxation step
     def total_energy_per_atom
       self.total_energy/geometry.size rescue "N/A"
     end
     
+    # Return the total corrected energy per atom for this relaxation step
     def total_corrected_energy_per_atom
       self.total_corrected_energy/geometry.size rescue "N/A"
     end
     
+    # The total CPU time deterimed by summing the time for
+    # each self-consistency iteration
     def total_cpu_time
       val = self.sc_iterations.inject(0){|total, iter|
         total = total + iter.total_cpu_time
@@ -28,6 +51,8 @@ module Aims
       val or 0
     end
     
+    # The total wall clock time deterimed by summing the time for
+    # each self-consistency iteration
     def total_wall_time
       val = self.sc_iterations.inject(0){|total, iter|
         total = total + iter.total_wall_time
@@ -36,13 +61,27 @@ module Aims
     end
   end
   
+  # A single self-consistency iteration
   class SCIteration
-    attr_accessor :d_etot, :d_eev, :d_rho, :timings
+    
+    # The change in total energy
+    attr_accessor :d_etot
+    
+    # The change in the sum of eigenvalues
+    attr_accessor :d_eev
+    
+    # The change in charge density
+    attr_accessor :d_rho
+    
+    # The timing data for this iteration
+    attr_accessor :timings
 
+    # Initialize a new self-consistency iteration
     def initialize
       self.timings = Array.new
     end
     
+    # Return the total CPU time for this iteration
     def total_cpu_time
       begin
         total= self.timings.find{|t| t[:description] =~ /Time for this iteration/}
@@ -54,6 +93,7 @@ module Aims
       end
     end
 
+    # Return the total wall clock time for this iteration
     def total_wall_time
       begin
         time = self.timings.find{|t| t[:description] =~ /Time for this iteration/}
@@ -66,6 +106,8 @@ module Aims
     end
   end
   
+  # An object encapsulating the data that is output from AIMS.
+  # This object is generated from Aims::OutputParser.parse(filename)
   class AimsOutput
     attr_accessor :geometry_steps, :k_grid, :original_file, :geometry_converged, :timings, :computational_steps, :n_atoms
     
@@ -122,6 +164,9 @@ module Aims
     end
   end
   
+  # Parse an AIMS output file and generate an AimsOutput object
+  # Invoke with 
+  #  output = Aims::OutputParser.parse(filename)
   class OutputParser
     
     def OutputParser.parse_input_geometry(io, n_atoms)
@@ -133,10 +178,11 @@ module Aims
         a.species = fields[3]
         atoms << a
       end
-      UnitCell.new(atoms)
+      Geometry.new(atoms)
     end
 
     def OutputParser.parse_updated_geometry(io, n_atoms)
+      io.readline
       vectors = []
       3.times do 
         fields = io.readline.split(' ')
@@ -151,7 +197,7 @@ module Aims
         a.species = fields[4]
         atoms << a
       end
-      UnitCell.new(atoms, vectors)
+      Geometry.new(atoms, vectors)
     end
     
     def OutputParser.parse_sc_timings(io)
@@ -214,10 +260,13 @@ module Aims
             when /Detailed time accounting/
               retval.timings = OutputParser.parse_detailed_time_accounting(f)
               
+            when /Begin self-consistency loop/
+              retval.geometry_step.sc_iterations << SCIteration.new
+              
             when /Begin self-consistency iteration/
               retval.geometry_step.sc_iterations << SCIteration.new
 
-            when /End self-consistency iteration/
+            when /End self-consistency iteration/, /End scf initialization - timings/
               retval.sc_iteration.timings = OutputParser.parse_sc_timings(f)
 
             when /Change of charge density/
@@ -257,13 +306,11 @@ module Aims
               retval.geometry_step.geometry.lattice_vectors = vectors
 
             when /\ Updated\ atomic\ structure\:/
-              f.readline
               retval.geometry_steps << GeometryStep.new 
               retval.geometry_step.geometry = OutputParser.parse_updated_geometry(f, n_atoms)
             #  retval.geometry_step.geometry.lattice_vectors = vectors
               
             when /\ Final\ atomic\ structure\:/
-              f.readline
               retval.geometry_step.geometry = OutputParser.parse_updated_geometry(f, n_atoms)
              # retval.geometry_step.geometry.lattice_vectors = vectors
             when /\  Total\ atomic\ forces/

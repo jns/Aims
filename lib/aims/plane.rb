@@ -1,18 +1,17 @@
 module Aims
   
+  # A Class representing a plane.
+  # Internally stored in Hessian Normal Form.
+  # 0 = Ax + By + Cz - D
+  #
+  # (A,B,C) is the plane normal.
+  # D is the distance from the origin.
   class Plane
-=begin
- A Class representing a plane.
- Internally stored in Hessian Normal Form.
- 0 = Ax + By + Cz - D
- [A,B,C] is the plane normal.
- D is the distance from the origin.
-=end
     attr_reader :a, :b, :c, :d
   
-    # Initialize this plane with the normal and a
+    # Initialize this plane with the normal (a,b,c) and a
     # point (x,y,z) on the plane
-    def initialize(a, b, c, x, y,z)
+    def initialize(a, b, c, x=0, y=0, z=0)
       @a = a
       @b = b
       @c = c
@@ -41,32 +40,35 @@ module Aims
       return Vector[0,0,0]
     end
     
-    # The distance to a point (x,y,z) is
-    # D - Ax - By - Cz
+    # Return the distance to point (x,y,z)
+    #
+    # distance = D - Ax - By - Cz
     def distance_to_point(x, y, z)
       a*x + b*y + c*z - d
     end
     
-    # Return the unit normal
+    # Return the unit normal Vector[a, b, c]
     def unit_normal
       v = Vector[@a, @b, @c]
       v*(1/v.r)
     end
     
     # The equation for the interstion of a ray and a plane
-    #  
+    # NOT YET IMPLEMENTED
     def intersection_with_ray(a, b)
-      
+      raise "Sorry. Plane#intersection_with_ray is not yet implemented"
     end
     
-    # Displace this plane in the direction of its normal
+    # Displace this plane a distance in the direction of its normal
     def displace_along_normal(distance)
       @d += distance
     end
     
-    # Two planes are equal if there ABCD parametersequal
+    # Two planes are equal if there ABCD parameters are equal
     def ==(aPlane)
       @a == aPlane.a and @b == aPlane.b and @c == aPlane.c and @d == aPlane.d
     end
+    alias_method :eql?, :==
+    
   end
 end
