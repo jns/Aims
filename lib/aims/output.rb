@@ -79,6 +79,9 @@ module Aims
     # Initialize a new self-consistency iteration
     def initialize
       self.timings = Array.new
+      self.d_eev = 0
+      self.d_rho = 0
+      self.d_etot = 0
     end
     
     # Return the total CPU time for this iteration
@@ -121,7 +124,7 @@ module Aims
     def total_energy
       etot = self.geometry_steps.collect{|gs| gs.total_energy }.compact.last
       if etot.nil? 
-        "NaN"
+        Float::NAN
       else
         etot
       end
@@ -291,7 +294,7 @@ module Aims
               
             when /Begin self-consistency iteration/
               retval.geometry_step.sc_iterations << SCIteration.new
-
+                            
             when /End self-consistency iteration/, /End scf initialization - timings/
               retval.sc_iteration.timings = OutputParser.parse_sc_timings(f)
 

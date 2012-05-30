@@ -94,9 +94,10 @@ begin
       puts "Total Corrected Energy\t#{step.total_corrected_energy}"
       puts "Total Corrected Energy/atom\t#{step.total_corrected_energy_per_atom}"
 
-      puts "iter\td_etot\td_eev\td_rho"
+      format = "%4i % 6e % 6e % 6e"
+      puts "%4s %13s %13s %13s" % %w(iter d_etot d_eev d_rho)
       step.sc_iterations.each_with_index{|sc_iter, iter|
-        puts [iter, sc_iter.d_etot, sc_iter.d_eev, sc_iter.d_rho].join("\t")
+        puts format % [iter, sc_iter.d_etot, sc_iter.d_eev, sc_iter.d_rho]
         if options[:timings]
           sc_iter.timings.each{|t|
             puts "#{t[:description]}\t#{t[:cpu_time]}"
