@@ -3,6 +3,9 @@ module Aims
   # A geometry relaxation step in the calculation
   class GeometryStep
 
+    # The relaxation step number
+    attr_accessor :step_num
+
     # An Array of self-consistency iterations
     attr_reader :sc_iterations
 
@@ -42,22 +45,106 @@ module Aims
       self.total_corrected_energy/geometry.size rescue "N/A"
     end
     
+    # A hash with keys :description, :cpu_time, and :wall_time
+    # with detailed time accounting for this geometry step.
+    def timings
+      timings = Timings.new
+      self.sc_iterations.each{|sc_iter|
+        timings.add!(sc_iter.timings)
+      }
+      timings
+    end
+
     # The total CPU time deterimed by summing the time for
     # each self-consistency iteration
     def total_cpu_time
-      val = self.sc_iterations.inject(0){|total, iter|
-        total = total + iter.total_cpu_time
+      self.sc_iterations.inject(0){|tot, sc_iter|
+        tot += sc_iter.total_cpu_time
       }
-      val or 0
     end
+    
     
     # The total wall clock time deterimed by summing the time for
     # each self-consistency iteration
     def total_wall_time
-      val = self.sc_iterations.inject(0){|total, iter|
-        total = total + iter.total_wall_time
+      self.sc_iterations.inject(0){|tot, sc_iter|
+        tot += sc_iter.total_wall_time
       }
-      val or 0 
+    end
+  end
+  
+  # A class for encapsulating computational timing information
+  class Timings
+    
+    # Initialize a new timing 
+    def initialize
+      @timing_hash = {}
+    end
+    
+    # Enumerate over an array of hashes that looks like:
+    # [{:description => "Something", :cpu_time => 10.0, :wall_time => 10.1}, ...]
+    def each
+      @timing_hash.each_pair{|desc,timings|
+        h = {:description => desc, :cpu_time => timings[:cpu_time], :wall_time => timings[:wall_time]}
+        yield h
+      }
+    end
+    
+    # Add another timings object to this one
+    def add!(timings)
+      timings.descriptions.each{|d|
+        add_cpu_time(d, timings.cpu_time(d))
+        add_wall_time(d, timings.wall_time(d))
+      }
+    end
+    
+    # Get all the descriptions for this timing object
+    def descriptions
+      @timing_hash.keys
+    end
+    
+    # Add  cpu timing data for the given description
+    def add_cpu_time(desc, time)
+      @timing_hash[desc] = {:cpu_time => 0, :wall_time => 0} unless @timing_hash[desc]
+      @timing_hash[desc][:cpu_time] += time
+    end
+    
+    # Add  wall timing data for the given description
+    def add_wall_time(desc, time)
+      @timing_hash[desc] = {:cpu_time => 0, :wall_time => 0} unless @timing_hash[desc]
+      @timing_hash[desc][:wall_time] += time
+    end
+    
+    # Get wall timing data for the given description
+    def wall_time(desc)
+      if @timing_hash[desc]
+        @timing_hash[desc][:wall_time] || 0
+      else
+        0
+      end
+    end
+    
+    # Get the total wall time
+    def total_wall_time
+      @timing_hash.inject(0) {|total, a|
+        total += a[1][:wall_time]
+      }
+    end
+    
+    # Get cpu timing data for the given description
+    def cpu_time(desc)
+      if @timing_hash[desc]
+        @timing_hash[desc][:cpu_time] || 0
+      else
+        0
+      end
+    end
+
+    # Get the total cpu time
+    def total_cpu_time
+      @timing_hash.inject(0) {|total, a|
+        total += a[1][:cpu_time]
+      }
     end
   end
   
@@ -78,7 +165,7 @@ module Aims
 
     # Initialize a new self-consistency iteration
     def initialize
-      self.timings = Array.new
+      self.timings = Timings.new
       self.d_eev = 0
       self.d_rho = 0
       self.d_etot = 0
@@ -86,33 +173,48 @@ module Aims
     
     # Return the total CPU time for this iteration
     def total_cpu_time
-      begin
-        total= self.timings.find{|t| t[:description] =~ /Time for this iteration/}
-        total[:cpu_time]
-      rescue
-        self.timings.inject(0){|total, time|
-          total = total + (time[:cpu_time] || 0)
-        }
-      end
+      self.timings.cpu_time("Time for this iteration")
+      # begin
+      #   total= self.timings.find{|t| t[:description] =~ /Time for this iteration/}
+      #   total[:cpu_time]
+      # rescue
+      #   self.timings.inject(0){|total, time|
+      #     total = total + (time[:cpu_time] || 0)
+      #   }
+      # end
     end
 
     # Return the total wall clock time for this iteration
     def total_wall_time
-      begin
-        time = self.timings.find{|t| t[:description] =~ /Time for this iteration/}
-        time[:wall_time] or 0
-      rescue
-        self.timings.inject(0){|total, time|
-          total = total + (time[:wall_clock_time] || 0)
-        }
-      end
+      self.timings.wall_time("Time for this iteration")
+      # begin
+      #   time = self.timings.find{|t| t[:description] =~ /Time for this iteration/}
+      #   time[:wall_time] or 0
+      # rescue
+      #   self.timings.inject(0){|total, time|
+      #     total = total + (time[:wall_clock_time] || 0)
+      #   }
+      # end
     end
   end
   
   # An object encapsulating the data that is output from AIMS.
   # This object is generated from Aims::OutputParser.parse(filename)
   class AimsOutput
-    attr_accessor :geometry_steps, :k_grid, :original_file, :geometry_converged, :timings, :computational_steps, :n_atoms
+    # Each geometry relaxation step
+    attr_accessor :geometry_steps
+    # The k-point grid for periodic calculations
+    attr_accessor :k_grid
+    # The name of the calculation output file
+    attr_accessor :original_file
+    # Boolean, true if the geometry is converged
+    attr_accessor :geometry_converged
+    # The detailed time accounting data. will be nil if the calculation did not complete
+    attr_accessor :timings
+    # ?
+    attr_accessor :computational_steps
+    # The number of atoms in the computation
+    attr_accessor :n_atoms
     
     def initialize
       self.geometry_steps = Array.new
@@ -181,7 +283,7 @@ module Aims
         a.species = fields[3]
         atoms << a
       end
-      Geometry.new(atoms)
+      Geometry.new(atoms, nil, :dont_make_bonds)
     end
 
     def OutputParser.parse_atom_frac(line)
@@ -226,18 +328,20 @@ module Aims
       
       vectors = nil if vectors.empty?
       
-      Geometry.new(atoms, vectors)
+      Geometry.new(atoms, vectors, :dont_make_bonds)
     end
     
     def OutputParser.parse_sc_timings(io)
       line = io.readline
-      timings = []
+      timings = Timings.new
       until line =~ /---/
         desc, times = line.split(":")
         fields = times.split(" ")
+        description = desc.sub("|", "").strip
         cpu = fields[0].to_f
         wall = fields[2].to_f
-        timings << {:description => desc.strip, :cpu_time => cpu, :wall_clock_time => wall}
+        timings.add_cpu_time(description, cpu)
+        timings.add_wall_time(description, wall)
         line = io.readline
       end
       timings
@@ -245,13 +349,15 @@ module Aims
     
     def OutputParser.parse_detailed_time_accounting(io)
       line = io.readline
-      timings = []
+      timings = Timings.new
       desc, times = line.split(":")
       until times.nil?
         fields = times.split(" ")
+        description = desc.sub("|", "").strip
         cpu = fields[0].to_f
         wall = fields[2].to_f
-        timings << {:description => desc.strip[1..-1].strip, :cpu_time => cpu, :wall_clock_time => wall}
+        timings.add_cpu_time(description, cpu)
+        timings.add_wall_time(description, wall)
         line = io.readline
         desc, times = line.split(":")
       end
@@ -263,7 +369,7 @@ module Aims
       steps = []
       desc, value = line.split(":")
       until value.nil?
-        steps << {:description => desc.strip[1..-1].strip, :value => value.to_f}
+        steps << {:description => desc.sub("|", " ").strip, :value => value.to_f}
         line = io.readline
         desc, value = line.split(":")
       end
@@ -331,11 +437,14 @@ module Aims
               end
               2.times {f.readline} 
               retval.geometry_steps << GeometryStep.new 
+              retval.geometry_step.step_num = 0
               retval.geometry_step.geometry = OutputParser.parse_input_geometry(f, n_atoms)
               retval.geometry_step.geometry.lattice_vectors = vectors
 
             when /\ Updated\ atomic\ structure\:/
+              last_step_num = retval.geometry_step.step_num
               retval.geometry_steps << GeometryStep.new 
+              retval.geometry_step.step_num = last_step_num + 1
               retval.geometry_step.geometry = OutputParser.parse_updated_geometry(f, n_atoms)
             #  retval.geometry_step.geometry.lattice_vectors = vectors
               
