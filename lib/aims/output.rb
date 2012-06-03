@@ -6,16 +6,16 @@ module Aims
     # The relaxation step number
     attr_accessor :step_num
 
-    # An Array of self-consistency iterations
+    # An Array of Aims::SCIteration 
     attr_reader :sc_iterations
 
-    # The geometry
+    # The Aims::Geometry
     attr_accessor :geometry
 
-    # The total energy for this geometry
+    # The total energy for this geometry as a Float
     attr_accessor :total_energy
 
-    # The total corrected energy for this geometry
+    # The total corrected energy for this geometry as a Float
     attr_accessor :total_corrected_energy
     
     # The chemical potential for this geometry
@@ -28,6 +28,10 @@ module Aims
     def initialize
       @sc_iterations = Array.new
       @forces = Array.new
+      @step_num = -1
+      @total_energy = Float::NAN
+      @total_corrected_energy = Float::NAN
+      @chemical_potential = Float::NAN
     end
 
     # Return the last self-consistency iteration for this relaxation step
@@ -160,7 +164,7 @@ module Aims
     # The change in charge density
     attr_accessor :d_rho
     
-    # The timing data for this iteration
+    # The Timings data for this iteration
     attr_accessor :timings
 
     # Initialize a new self-consistency iteration
@@ -201,18 +205,25 @@ module Aims
   # An object encapsulating the data that is output from AIMS.
   # This object is generated from Aims::OutputParser.parse(filename)
   class AimsOutput
-    # Each geometry relaxation step
+    # Each Aims::GeometryStep geometry relaxation step
     attr_accessor :geometry_steps
+    
     # The k-point grid for periodic calculations
     attr_accessor :k_grid
+    
     # The name of the calculation output file
     attr_accessor :original_file
+    
     # Boolean, true if the geometry is converged
     attr_accessor :geometry_converged
-    # The detailed time accounting data. will be nil if the calculation did not complete
+    
+    # The detailed time accounting data as a Aims::Timings
+    # will be nil if the calculation did not complete
     attr_accessor :timings
+    
     # ?
     attr_accessor :computational_steps
+    
     # The number of atoms in the computation
     attr_accessor :n_atoms
     

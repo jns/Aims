@@ -3,9 +3,12 @@
 require 'optparse'
 require 'aims'
 
+
+
 options = {:step => :all}
 
-OptionParser.new do |opts|
+optParser = OptionParser.new do |opts|
+  opts.banner = "usage: #{File.basename $0} [options] file1 [file2 ...]" 
   opts.on('-s', '--step [N]', 'Output information for relaxation step.', 
                                   "Specify an integer, 'first', 'last', or 'all'", 
                                   "Default is 'all'") do |s|
@@ -21,7 +24,11 @@ OptionParser.new do |opts|
     end
   end
 
-  opts.on('-d', '--geometry-delta', 'Output change from geometry in to geometry final') do
+  opts.on('--debug', 'Debug output') do 
+    options[:debug] = true
+  end
+
+  opts.on('--geometry-delta', 'Display change from input geometry to final geometry') do
     options[:geometry_delta] = true
   end
 
@@ -29,7 +36,7 @@ OptionParser.new do |opts|
     options[:self_consistency] = true
   end
 
-  opts.on('-f', 'Output forces') do 
+  opts.on('-f', 'Output max force component for each geometry relaxation step') do 
     options[:forces] = true
   end
 
@@ -37,11 +44,16 @@ OptionParser.new do |opts|
     options[:timings] = true
   end
 
-end.parse!
+end
 
 begin
-
+  optParser.parse!(ARGV)
+  
   files = ARGV
+  if files.empty?
+    puts optParser.help
+    exit
+  end
   outputs = files.collect{|f|
     Aims::OutputParser.parse(f)
   }
@@ -50,6 +62,12 @@ begin
   total_relaxations = 0
 
   outputs.each{|output|
+    
+    puts "**************************************************************************"
+    puts "**"
+    puts "**   #{output.original_file}"
+    puts "**"
+    puts "**************************************************************************"
     
     steps = case options[:step]
     when Integer
@@ -76,7 +94,8 @@ begin
 
       sciter_format  = "%-20s %20i"
       timings_format = "%-35s %20.5f"
-      energy_format  = "%-35s %20.5e"
+      energy_format  = "%-35s %20.5f"
+      force_format  = "%-35s %20.5e"
       
       puts "= Relaxation Step #{step.step_num} ="
       
@@ -85,8 +104,8 @@ begin
       puts indent + energy_format % ["Total Energy", step.total_energy]
       puts indent + timings_format % ["Total CPU time", step.total_cpu_time]        
       puts indent + timings_format % ["Total Wall time", step.total_wall_time]        
-      unless step.forces.empty?
-        puts "Max force: #{step.forces.max{|a,b| a.r <=> b.r}.r}" if options[:forces]
+      if options[:forces] and not step.forces.empty?
+        puts indent + force_format % ["Max Force", step.forces.max{|a,b| a.r <=> b.r}.r] 
       end
       if options[:timings]
         puts "  Cumulative SC Timings:"
@@ -120,20 +139,19 @@ begin
           puts ""
         }
       end
-      
-      puts step.geometry.format_geometry_in if options[:geometry]
 
       puts "\n\n"
       
       
     }
 
+    unless output.geometry_converged
+      puts "Warning Geometry not converged!"
+    end
+
     if options[:geometry_delta]
       puts "= Change in atomic positions for calculation"
       puts output.geometry_steps.last.geometry.delta(output.geometry_steps.first.geometry)
-      unless output.geometry_converged
-        puts "Warning Geometry not converged!"
-      end
     end
   }
 
@@ -145,6 +163,12 @@ begin
 rescue
   puts ""
   puts "Sorry. There was an error parsing the remainder of the file."
+  if options[:debug]
+    puts $!.message 
+    puts $!.backtrace
+  else
+    puts "Rerun with --debug for more info"
+  end
   puts ""
   exit
 end

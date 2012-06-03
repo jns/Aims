@@ -2,6 +2,11 @@
 
 require 'aims'
 files = ARGV
+if files.empty?
+  puts "usage: #{File.basename $0} file1 [file2] ..."
+  exit
+end
+
 STDOUT.sync = true
 puts "%-10s \t %-20s \t %-15s \t %9s \t %7s \t %10s \t %12s \t %8s \t %10s" % %w(RUN FILE TOTAL_ENERGY NUM_ATOMS K-GRID CONVERGED RELAX_STEPS SC_ITERS TOTAL_TIME)
 format = "%-10s \t %-20s \t %+15e \t %9i \t %7s \t %10s \t %12i \t %8i \t %10.2f"

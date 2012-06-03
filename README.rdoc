@@ -1,5 +1,5 @@
 
-== What is the Aims Gem?
+= What is the Aims Gem?
 
 The Aims gem is a ruby interface to the FHI-Aims ab-initio molecular simulation package published by the Fritz-Haber Institute [https://aimsclub.fhi-berlin.mpg.de/]. It provides a set of tools for parsing and generating the input and output files for AIMS. 
 
@@ -7,7 +7,7 @@ The aims gem is written by Joshua Shapiro and release under the MIT license.
 
 Copyright (c) Joshua Shapiro 2012
 
-== Why should I use the Aims Gem?
+= Why should I use the Aims Gem?
 
 If you like Ruby, and you like AIMS, then this gem provides you with a pure Ruby object-oriented interface to AIMS.  You can use this library to: 
 
@@ -18,15 +18,16 @@ If you like Ruby, and you like AIMS, then this gem provides you with a pure Ruby
 * Summarize the output of AIMS using simple scripts that come with the gem
 * Whatever else you can imagine..
 
-== Installation
+= Installation
 
 To use this gem, you will need to have an installation of ruby.  If you own a mac or a linux machine, then you already have ruby.  If you have a windows machine, then you need to install ruby.  The recommended way to install Ruby on windows (as of June 2012) is via http://rubyinstaller.org .
 
 Once you have ruby, then just invoke the following from a terminal window.
 
   gem install aims
- 
-== Using the Aims gem to generate geometry.in files
+
+= Usage 
+== Using the Aims GEM to generate geometry.in files
 
 The following code can be used interactively in an +irb+ ruby interpreter, or can be
 invoked in a ruby script.
@@ -73,3 +74,27 @@ And here is how you can constrain the bottom three layers
   constrain = 3
   puts zb.get_001_surface(layers, vacuum, constrain)
   
+== Scripts that come with the Aims GEM
+
+There are currently two scripts that come with the GEM
+
+=== aims_output.rb
+Quickly output the total energy, and timing information from the
+calculation to make sure everything went smoothly.  
+Don't use this as a replacement for actually looking at the output of Aims.
+
+  usage: aims_output.rb [options] file1 [file2 ...]
+      -s, --step [N]                   Output information for relaxation step.
+                                       Specify an integer, 'first', 'last', or 'all'
+                                       Default is 'all'
+          --debug                      Debug output
+          --geometry-delta             Display change from input geometry to final geometry
+      -c, --self-consistency           Output self-consistency information
+      -f                               Output max force component for each geometry relaxation step
+      -t                               Output timings
+
+=== aims_summary.rb
+Display a one-line summary for a list of calculations in tabular form.
+Useful for copying and pasting into a spreadsheet.
+
+    usage: aims_summary.rb file1 [file2] ...
