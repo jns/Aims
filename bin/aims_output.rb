@@ -58,6 +58,15 @@ begin
     Aims::OutputParser.parse(f)
   }
 
+  int_format = "%-20s %20i"
+  float_format = "%-20s 20.5f"
+  exp_format = "%-20s %20.5e"
+  
+  sciter_format  = "%-20s %20i"
+  timings_format = "%-35s %20.5f"
+  energy_format  = "%-35s %20.5f"
+  force_format  = "%-35s %20.5e"
+
   total_sc_iterations = 0
   total_relaxations = 0
 
@@ -91,11 +100,6 @@ begin
 
       total_relaxations += 1
       total_sc_iterations += step.sc_iterations.size
-
-      sciter_format  = "%-20s %20i"
-      timings_format = "%-35s %20.5f"
-      energy_format  = "%-35s %20.5f"
-      force_format  = "%-35s %20.5e"
       
       puts "= Relaxation Step #{step.step_num} ="
       
@@ -122,9 +126,9 @@ begin
           puts "  == SC Iteration #{iter} =="
 
           # Output convergence criterion
-          puts indent + energy_format % ["Change in total energy", sc_iter.d_etot]
-          puts indent + energy_format % ["Change in sum of eigenvalues", sc_iter.d_eev]
-          puts indent + energy_format % ["Change in charge density", sc_iter.d_rho]
+          puts indent + exp_format % ["Change in total energy", sc_iter.d_etot]
+          puts indent + exp_format % ["Change in sum of eigenvalues", sc_iter.d_eev]
+          puts indent + exp_format % ["Change in charge density", sc_iter.d_rho]
           
           # Output timings if requested
           if options[:timings]
@@ -145,9 +149,22 @@ begin
       
     }
 
+    puts "= Calculation Summary ="
     unless output.geometry_converged
       puts "Warning Geometry not converged!"
     end
+
+    puts int_format % ["Number of SC Iterations found:", total_sc_iterations]
+    puts int_format % ["Number of Relaxation Steps found:", total_relaxations]
+    puts float_format % ["Total CPU time", output.total_cpu_time]   
+
+    output.computational_steps.each{|cs| 
+      puts int_format % [cs[:description], cs[:value]]
+    }
+    if options[:timings]
+      output.timings.each{|t| puts "   " +timings_format % [t[:description], t[:cpu_time]]} 
+    end
+    # puts timings_format % ["Total Wall time", output.total_wall_time]        
 
     if options[:geometry_delta]
       puts "= Change in atomic positions for calculation"

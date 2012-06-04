@@ -150,6 +150,7 @@ module Aims
         total += a[1][:cpu_time]
       }
     end
+    
   end
   
   # A single self-consistency iteration
@@ -411,8 +412,8 @@ module Aims
               
             when /Begin self-consistency iteration/
               retval.geometry_step.sc_iterations << SCIteration.new
-                            
-            when /End self-consistency iteration/, /End scf initialization - timings/
+              
+            when /End self-consistency iteration/, /End scf initialization - timings/, /End scf reinitialization - timings/
               retval.sc_iteration.timings = OutputParser.parse_sc_timings(f)
 
             when /Change of charge density/
