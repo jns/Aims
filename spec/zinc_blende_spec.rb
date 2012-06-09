@@ -34,6 +34,13 @@ describe ZincBlende do
           s.atoms.size.should eq(6)
         end
     
+        it "should have 20AA of vacuum" do
+          maxz = s.atoms.max{|a,b| a.z <=> b.z}.z
+          minz = s.atoms.min{|a,b| a.z <=> b.z}.z
+          z_vector = s.lattice_vectors[2][2]
+          (z_vector - (maxz - minz)).should eq (20)
+        end
+    
         it "should have i constrained atoms" do 
           s.atoms.find_all{|a| a.constrained?}.size.should eq(i)
         end
@@ -49,6 +56,13 @@ describe ZincBlende do
         # The 110 surface has 2 atoms per monolayer
         s.atoms.size.should eq(i*2)
       end
+
+      it "should have 20AA of vacuum" do
+        maxz = s.atoms.max{|a,b| a.z <=> b.z}.z
+        minz = s.atoms.min{|a,b| a.z <=> b.z}.z
+        z_vector = s.lattice_vectors[2][2]
+        (z_vector - (maxz - minz)).should eq (20)
+      end
     end
 
     5.times do |i|
@@ -59,5 +73,18 @@ describe ZincBlende do
     end
   end
 
+  context "111 Slab" do 
+    s = zb.get_110_surface(5, 20)
+    it "should have 10 atoms" do
+      # The 110 surface has 2 atoms per monolayer
+      s.atoms.size.should eq(10)
+    end
+    it "should have 20AA of vacuum" do
+      maxz = s.atoms.max{|a,b| a.z <=> b.z}.z
+      minz = s.atoms.min{|a,b| a.z <=> b.z}.z
+      z_vector = s.lattice_vectors[2][2]
+      (z_vector - (maxz - minz)).should eq (20)
+    end
+  end
 
 end

@@ -107,7 +107,7 @@ module Aims
       if 0 < vacuum
         # Add vacuum
         monolayerSep = v3[2]/2
-        zb.lattice_vectors[2] = Vector[0, 0, monolayers*monolayerSep.abs + vacuum.to_f]
+        zb.lattice_vectors[2] = Vector[0, 0, (monolayers-1)*monolayerSep.abs + vacuum.to_f]
         # Move everything into a nice tidy unit cell. 
         zb = zb.correct
       end
@@ -192,7 +192,7 @@ module Aims
         zb = zb.repeat(1,1,monolayers+1)
         
         bilayerSep = v3[2]
-        zb.lattice_vectors[2] = Vector[0, 0, monolayers*(bilayerSep.abs) + vacuum]
+        zb.lattice_vectors[2] = Vector[0, 0, (monolayers-1)*(bilayerSep.abs) + vacuum]
 
         # Strip off the top and bottom atom
         minZ = zb.atoms.min{|a,b| a.z <=> b.z}.z
@@ -287,10 +287,10 @@ module Aims
       zb = zb.repeat(1,1,monolayers)
 
 
+      monolayerSep = v3[2]
       if 0 < vacuum
         # Add vacuum
-        monolayerSep = v3[2]
-        zb.lattice_vectors[2] = Vector[0, 0, monolayers*monolayerSep.abs + vacuum.to_f]
+        zb.lattice_vectors[2] = Vector[0, 0, (monolayers-1)*monolayerSep.abs + vacuum.to_f]
         # Move everything into a nice tidy unit cell. 
         zb = zb.correct
       end

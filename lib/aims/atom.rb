@@ -17,7 +17,7 @@ module Aims
     # The relaxation constraints of this atom
     attr_accessor :constrain
     # Two atoms are equal if their coordinates are the same to this precision
-    attr_accessor :precision
+    attr_accessor :precision # Seems like it should really be a class variable
     
     include Enumerable
     
@@ -93,10 +93,18 @@ module Aims
 		Math.sqrt((self.x - atom.x)**2 + (self.y - atom.y)**2 + (self.z - atom.z)**2)
 	end
 	
-	# A deep copy of the atom
+	# A deep copy of the atom, but with a unique id
     def copy
       Atom.new(self.x, self.y, self.z, self.species, self.constrain)
     end
+    
+    # An exact clone of the atom. Same ID and everything
+    def clone
+      a = Atom.new(self.x, self.y, self.z, self.species, self.constrain)
+      a.id = self.id
+      return a
+    end
+    
     
     # Return a new atom with the same species and relaxation constraints
     # but with coordinates displaced by +x+, +y+, +z+
