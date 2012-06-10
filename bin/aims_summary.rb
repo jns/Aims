@@ -9,7 +9,7 @@ end
 
 STDOUT.sync = true
 puts "%-10s \t %-20s \t %-15s \t %9s \t %7s \t %10s \t %12s \t %8s \t %10s" % %w(RUN FILE TOTAL_ENERGY NUM_ATOMS K-GRID CONVERGED RELAX_STEPS SC_ITERS TOTAL_TIME)
-format = "%-10s \t %-20s \t %+15e \t %9i \t %7s \t %10s \t %12i \t %8i \t %10.2f"
+format = "%-10s \t %-20s \t %+15f \t %9i \t %7s \t %10s \t %12i \t %8i \t %10.2f"
 files.each{|f|
   run = f.split(".").last
   begin

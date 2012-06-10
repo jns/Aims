@@ -232,6 +232,7 @@ module Aims
       self.geometry_steps = Array.new
       self.geometry_converged = false
       self.timings = {}
+      self.computational_steps = Array.new
     end
     
     # Returns the best available value of the total energy

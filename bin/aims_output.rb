@@ -55,7 +55,7 @@ begin
     exit
   end
   outputs = files.collect{|f|
-    Aims::OutputParser.parse(f)
+      Aims::OutputParser.parse(f)
   }
 
   int_format = "%-20s %20i"
