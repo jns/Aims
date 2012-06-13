@@ -8,13 +8,13 @@ if files.empty?
 end
 
 STDOUT.sync = true
-puts "%-10s \t %-20s \t %-15s \t %9s \t %7s \t %10s \t %12s \t %8s \t %10s" % %w(RUN FILE TOTAL_ENERGY NUM_ATOMS K-GRID CONVERGED RELAX_STEPS SC_ITERS TOTAL_TIME)
-format = "%-10s \t %-20s \t %+15f \t %9i \t %7s \t %10s \t %12i \t %8i \t %10.2f"
+puts "%-40s \t %-15s \t %9s \t %7s \t %10s \t %12s \t %8s \t %10s" % %w(FILE TOTAL_ENERGY NUM_ATOMS K-GRID CONVERGED RELAX_STEPS SC_ITERS TOTAL_TIME)
+format = "%-40s \t %+15f \t %9i \t %7s \t %10s \t %12i \t %8i \t %10.2f"
 files.each{|f|
   run = f.split(".").last
   begin
     o = Aims::OutputParser.parse(f)
-    puts format % [run, f[0...20], 
+    puts format % [f[0...40], 
                    (o.total_energy.nan? ? Float::NAN : o.total_energy), 
                    (o.n_atoms or -1), 
                    (o.k_grid ? o.k_grid.squeeze : "-"), 
