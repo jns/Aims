@@ -30,6 +30,6 @@ require 'aims/volume.rb'
 require 'aims/wurtzite.rb'
 require 'aims/zinc_blende.rb'
 
-# :include:README.rdoc
+# {include:file:README.rdoc}
 module Aims
 end

@@ -22,11 +22,12 @@ module Aims
     include Enumerable
     
     # Create an atom of the specified species at the given coordinates
-    # * +x+ The x coordinate of the atom in angstrom
-    # * +y+ The y coordinate of the atom in angstrom
-    # * +z+ The z coordinate of the atom in angstrom
-    # * +s+ The atomic species ex. "C", "Si", "S", etc. (can be nil)
-    # * +c+ The relaxation constraints. valid values are TRUE, FALSE, ".true.", ".false.", "x", "y", "z" or %w(x y z)
+    # @param [Float] x The x coordinate of the atom in angstrom
+    # @param [Float] y The y coordinate of the atom in angstrom
+    # @param [Float] z The z coordinate of the atom in angstrom
+    # @param [String, nil] s The atomic species ex. "C", "Si", "S", etc. (can be nil)
+    # @param [Boolean, String, Array<String>] c The relaxation constraints. valid values are TRUE, FALSE, ".true.", ".false.", "x", "y", "z" or %w(x y z)
+    # @return [Atom] a new Atom
     def initialize(x=nil, y=nil, z=nil, s=nil, c=Array.new)
       self.x = x
       self.y = y
