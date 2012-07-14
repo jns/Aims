@@ -4,8 +4,11 @@ module Aims
 # of four points. The normals of the planes must all point outward. This is tested
 # 
   class Volume
-  
-    include Vectorize
+    
+    # Add Vectorize as class methods
+    class<<self
+      include Vectorize
+    end
     
     # Quick recursive method for calculating combinations
     def Volume.choose(list, num, head = [])
@@ -31,6 +34,8 @@ module Aims
     # Return an array of tuples that define the 
     # vertices of intersection of these planes
     # Vertices are removed that lie in front of any plane
+    # @param [Array<Plane>] planes An array of Planes that define the boundaries of the volume
+    # @return [Array] An array of tuples that define the vertices of intersection of these planes
     def Volume.intersection_points(planes)
       combos = Volume.choose(planes, 3)
       points = []

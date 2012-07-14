@@ -32,4 +32,5 @@ require 'aims/zinc_blende.rb'
 
 # {include:file:README.rdoc}
 module Aims
+  include Math
 end
