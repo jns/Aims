@@ -402,9 +402,9 @@ module Aims
       nz_sign = (0 < nz) ? 1 : -1
       
       new_atoms = []
-      nx.abs.times do |i|        
-        ny.abs.times do |j|
-          nz.abs.times do |k|
+      nx.to_i.abs.times do |i|        
+        ny.to_i.abs.times do |j|
+          nz.to_i.abs.times do |k|
             new_atoms << self.displace(nx_sign*i*v1[0] + ny_sign*j*v2[0] + nz_sign*k*v3[0], 
                                        nx_sign*i*v1[1] + ny_sign*j*v2[1] + nz_sign*k*v3[1], 
                                        nx_sign*i*v1[2] + ny_sign*j*v2[2] + nz_sign*k*v3[2]).atoms
