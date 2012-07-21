@@ -519,6 +519,10 @@ module Aims
       # Make a coyp of the unit cell
       new_unit_cell = self.copy
 
+      # atoms on the border will be repeated with
+      # periodicity of lattice vectors for better rendering
+      border_atoms = {}
+      
       # Move each atom behind all the planes
       new_unit_cell.atoms(false).each do |atom|
         planes_vecs.each_pair do |p, v|
@@ -527,15 +531,39 @@ module Aims
             # move atoms not on the plane (inequality)
             while p.distance_to_point(atom.x, atom.y, atom.z) > 0
               atom.displace!(v[0], v[1], v[2])
-            end
+            end            
           else
             # Move atoms that lie on the plane if the plane doesn't intersect the origin
             while p.distance_to_point(atom.x, atom.y, atom.z) >= 0
               atom.displace!(v[0], v[1], v[2])
             end
           end
+          
+          # This part repeats atoms on the unit cell boundaries
+          # useful for drawing pictures, but these atoms are really repeats
+          if p.distance_to_point(atom.x, atom.y, atom.z) == 0
+            if border_atoms[atom]
+              border_atoms[atom] << v
+            else
+              border_atoms[atom] = [v]
+            end
+          end
         end
       end
+
+      # Add more border atoms for each combination of lattice planes
+      border_atoms.each_pair{|atom, planes|
+        planes.size.times{|i|
+          combos = Volume.choose(planes, i+1)
+          combos.each{|combo|
+            x = combo.inject(0){|sum, v| sum = sum + v[0]}
+            y = combo.inject(0){|sum, v| sum = sum + v[1]}
+            z = combo.inject(0){|sum, v| sum = sum + v[2]}
+            puts [x,y,z]
+            new_unit_cell.atoms(:allAtoms) << atom.displace(x, y, z)
+          }
+        }
+      }
       new_unit_cell.atoms.uniq!
       new_unit_cell.make_bonds
       return new_unit_cell
