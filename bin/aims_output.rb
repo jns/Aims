@@ -28,6 +28,10 @@ optParser = OptionParser.new do |opts|
     options[:debug] = true
   end
 
+  opts.on('-g', '--geometry', 'Output Geometry for selected relaxation steps') do 
+    options[:geometry] = true
+  end
+
   opts.on('--geometry-delta', 'Display change from input geometry to final geometry') do
     options[:geometry_delta] = true
   end
@@ -144,6 +148,10 @@ begin
         }
       end
 
+      if options[:geometry]
+        puts step.geometry.format_geometry_in
+      end
+
       puts "\n\n"
       
       
@@ -161,6 +169,8 @@ begin
     output.computational_steps.each{|cs| 
       puts int_format % [cs[:description], cs[:value]]
     }
+    
+    
     if options[:timings]
       output.timings.each{|t| puts "   " +timings_format % [t[:description], t[:cpu_time]]} 
     end

@@ -107,6 +107,15 @@ module Aims
       end
     end
     
+    # Remove the atoms satisfying the criteria specified in block
+    def remove_atoms
+      @atoms.reject!{|a|
+        yield a
+      }
+      recache_visible_atoms
+      self
+    end
+    
   # Generate and cache bonds for this geometry.
   # A bond will be generated for every pair of atoms closer than +bond_length+
 	def make_bonds(bond_length = 4.0)
@@ -283,9 +292,10 @@ module Aims
         mat*v
       }
       uc = Geometry.new(newatoms, newvectors)
-      uc.cart_to_miller = mat*self.cart_to_miller
-      uc.miller_to_cart = uc.cart_to_miller.inverse
-
+      if self.cart_to_miller
+        uc.cart_to_miller = mat*self.cart_to_miller
+        uc.miller_to_cart = uc.cart_to_miller.inverse
+      end
       return uc
     end
     
@@ -364,7 +374,7 @@ module Aims
     
     # Remove the specified atom from the unit cell
     def remove_atom(atom)
-      atoms.reject!{|a|
+      atoms(:all).reject!{|a|
        a.id == atom.id 
       }
       # Force a rehash of nearest-neighbor tree
@@ -478,7 +488,7 @@ module Aims
 
   # Move all atoms inside the primitive volume defined by the
   # six planes of the lattice vectors
-    def correct
+    def correct(repeat_border_atoms = false)
       
       # Hash for storing bounding planes and the out-of-plane vector
       # by which each atom will be displaced to move it into the primitive volume
@@ -552,18 +562,20 @@ module Aims
       end
 
       # Add more border atoms for each combination of lattice planes
-      border_atoms.each_pair{|atom, planes|
-        planes.size.times{|i|
-          combos = Volume.choose(planes, i+1)
-          combos.each{|combo|
-            x = combo.inject(0){|sum, v| sum = sum + v[0]}
-            y = combo.inject(0){|sum, v| sum = sum + v[1]}
-            z = combo.inject(0){|sum, v| sum = sum + v[2]}
-            puts [x,y,z]
-            new_unit_cell.atoms(:allAtoms) << atom.displace(x, y, z)
+      if repeat_border_atoms
+        border_atoms.each_pair{|atom, planes|
+          planes.size.times{|i|
+            combos = Volume.choose(planes, i+1)
+            combos.each{|combo|
+              x = combo.inject(0){|sum, v| sum = sum + v[0]}
+              y = combo.inject(0){|sum, v| sum = sum + v[1]}
+              z = combo.inject(0){|sum, v| sum = sum + v[2]}
+              puts [x,y,z]
+              new_unit_cell.atoms(:allAtoms) << atom.displace(x, y, z)
+            }
           }
         }
-      }
+      end
       new_unit_cell.atoms.uniq!
       new_unit_cell.make_bonds
       return new_unit_cell
