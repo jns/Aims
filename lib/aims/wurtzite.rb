@@ -20,10 +20,8 @@ module Aims
     
     def get_bulk
       # The lattice constant
-      a = (ARGV[0] || 4.0).to_f
+      a = lattice_const
       c = 1.63299*a # sqrt(8/3)a
-      #a = 6.19231 # Strained GaSb, Unstrained GaSb is 6.22
-      #a = 5.75 # Unstrained GaAs
 
       # The atoms on a HCP
       as1 = Atom.new(0,0,0,'As')
