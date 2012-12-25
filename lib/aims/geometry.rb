@@ -551,6 +551,7 @@ module Aims
           
           # This part repeats atoms on the unit cell boundaries
           # useful for drawing pictures, but these atoms are really repeats
+          # Add each border that intersects the atom to a list
           if p.distance_to_point(atom.x, atom.y, atom.z) == 0
             if border_atoms[atom]
               border_atoms[atom] << v

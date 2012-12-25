@@ -9,6 +9,8 @@ module Aims
   class Plane
     attr_reader :a, :b, :c, :d
   
+    include Vectorize
+    
     # Initialize this plane with the normal (a,b,c) and a
     # point (x,y,z) on the plane
     def initialize(a, b, c, x=0, y=0, z=0)
@@ -53,10 +55,35 @@ module Aims
       v*(1/v.r)
     end
     
-    # The equation for the interstion of a ray and a plane
-    # NOT YET IMPLEMENTED
+    # The equation for the interstion of ray defined by r(t) = (a + b*t)
+    # [a, b] are vectors where a is the tail of the ray and b points in the direction of the ray and t > 0
+    # and the plane normal Pn = [A B C]
+    #
+    # Substituting r(t) into the equation of the plane gives:
+    #  A(ax + bx*t) + B(ay + by*t) + C(az + bz*t) + D = 0 
+    #  
+    # Solve for t
+    # t = (Pn dot a + D)/(Pn dot b) = V0 / Vd
+    # if: 
+    #    Vd = 0, then no intersection
+    #    t < 0, then intersection behind ray origin
+    #
+    # Find point of intersection
+    # [(ax + bx*t) (ay + by*t) (az + bz*t)]
     def intersection_with_ray(a, b)
-      raise "Sorry. Plane#intersection_with_ray is not yet implemented"
+      n = self.unit_normal
+      vd = dot(n, b)
+      if vd == 0
+        return nil
+      else
+        v0 = dot(n, a) + @d
+        t = -v0/vd
+        if t < 0
+          return nil
+        else
+          return a + b*t
+        end
+      end
     end
     
     # Displace this plane a distance in the direction of its normal

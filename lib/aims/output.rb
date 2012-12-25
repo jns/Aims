@@ -208,6 +208,7 @@ module Aims
   class AimsOutput
     # Each Aims::GeometryStep geometry relaxation step
     attr_accessor :geometry_steps
+    alias_method :relaxation_steps, :geometry_steps
     
     # The k-point grid for periodic calculations
     attr_accessor :k_grid
@@ -397,6 +398,7 @@ module Aims
       retval.original_file = filename
       
       File.open(filename, 'r') do |f|
+        counter = 0
         f.each_line{|line|
           case line
             when /Found k-point grid:/
@@ -476,7 +478,6 @@ module Aims
           end
         }
       end
-
       return retval
       
     end
