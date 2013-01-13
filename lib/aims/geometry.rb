@@ -23,8 +23,6 @@ module Aims
     # A three element array of lattice vectors for periodic systems
     attr_accessor :lattice_vectors
     
-    # An array of Aims::Bond objects calculated when the Geometry is defined.
-	  attr_accessor :bonds
 	
     # clip_planes is an array of planes
     # The planes are defined with respect to the vectors millerX and millerZ
@@ -107,6 +105,15 @@ module Aims
       end
     end
     
+      # Return the 
+    def bonds(visibility = :visibleOnly)
+      if (visibility == :visibleOnly) and (0 < @clip_planes.size)
+        @visibleBonds
+      else
+        @bonds
+      end
+    end
+    
     # Remove the atoms satisfying the criteria specified in block
     def remove_atoms
       @atoms.reject!{|a|
@@ -120,7 +127,7 @@ module Aims
   # A bond will be generated for every pair of atoms closer than +bond_length+
 	def make_bonds(bond_length = 4.0)
 		# initialize an empty array
-		self.bonds = Array.new
+		@bonds = Array.new
 		
 		# Make bonds between all atoms
 		stack = atoms.dup
@@ -129,7 +136,7 @@ module Aims
 		while (not stack.empty?)
 			stack.each{|atom2|
 				b = Bond.new(atom1, atom2)
-				self.bonds << b if b.length < bond_length
+				@bonds << b if b.length < bond_length
 			}
 			atom1 = stack.pop
 		end
@@ -262,6 +269,24 @@ module Aims
           i = i-1 if 0 >= p.distance_to_point(a.x, a.y, a.z) 
         }
         @visibleAtoms << a if i == 0
+      }
+      
+      if @visibleBonds
+        @visibleBonds.clear
+      else
+        @visibleBonds = []
+      end
+      
+      @bonds.each{|b|
+        a0 = b[0]
+        a1 = b[1]
+        i0 = plane_count
+        i1 = plane_count
+        @clip_planes.each{|p|
+          i0 = i0-1 if 0 >= p.distance_to_point(a0.x, a0.y, a0.z)
+          i1 = i1-1 if 0 >= p.distance_to_point(a1.x, a1.y, a1.z)
+        }
+        @visibleBonds << b if (i0 + i1) < 2
       }
       
       make_bonds if makeBonds
