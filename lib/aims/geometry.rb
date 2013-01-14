@@ -277,6 +277,8 @@ module Aims
         @visibleBonds = []
       end
       
+      make_bonds if (makeBonds or @bonds.nil?)
+
       @bonds.each{|b|
         a0 = b[0]
         a1 = b[1]
@@ -289,7 +291,6 @@ module Aims
         @visibleBonds << b if (i0 + i1) < 2
       }
       
-      make_bonds if makeBonds
     end
     
     # Rotate the geometry in 3 dimensions. The rotation is 
