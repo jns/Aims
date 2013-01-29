@@ -125,7 +125,7 @@ module Aims
     
   # Generate and cache bonds for this geometry.
   # A bond will be generated for every pair of atoms closer than +bond_length+
-	def make_bonds(bond_length = 4.0)
+	def make_bonds(bond_length = 3.0)
 		# initialize an empty array
 		@bonds = Array.new
 		
@@ -137,11 +137,29 @@ module Aims
 			stack.each{|atom2|
 				b = Bond.new(atom1, atom2)
 				@bonds << b if b.length < bond_length
+				if periodic?
+				  lattice_vectors.each{|v|
+				    b = Bond.new(atom1, atom2.displace(v[0], v[1], v[2]))
+    				@bonds << b if b.length < bond_length
+				    b = Bond.new(atom1, atom2.displace(-1*v[0], -1*v[1], -1*v[2]))
+    				@bonds << b if b.length < bond_length
+				  }
+			  end
 			}
 			atom1 = stack.pop
 		end
 	end
 
+  # Return true if this geometry has lattice vectors defined
+  # and is periodic in R3
+  def periodic?
+    if lattice_vectors and lattice_vectors.size == 3
+        return true
+    else  
+        return false
+    end
+  end
+  
   # Add a clip Plane to the unit cell
   # recache the visible atoms if called with +recache = true+ (the Default)
   def add_plane(aPlane, recache = true)
