@@ -29,6 +29,7 @@ require 'aims/geometry.rb'
 require 'aims/volume.rb'
 require 'aims/wurtzite.rb'
 require 'aims/zinc_blende.rb'
+require 'aims/kd_tree.rb'
 
 # {include:file:README.rdoc}
 module Aims

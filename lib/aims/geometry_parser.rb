@@ -36,7 +36,7 @@ module Aims
           atoms.last.constrain << c
         end
       }
-      Geometry.new(atoms, vectors)
+      Geometry.new(atoms, vectors, false)
     end
 
     # Parse a geometry.in file

@@ -130,24 +130,48 @@ module Aims
 		@bonds = Array.new
 		
 		# Make bonds between all atoms
-		stack = atoms.dup
+    # stack = atoms.dup
+    atoms_extended = atoms.dup
+    if periodic?
+        v1 = lattice_vectors[0]
+        v2 = lattice_vectors[1]
+        atoms.each{|a|
+        [-1, 0, 1].each{|n1|
+              [-1, 0, 1].each{|n2|               
+                  atoms_extended << a.displace(n1*v1[0] + n2*v2[0], n1*v1[1] + n2*v2[1], n1*v1[2] + n2*v2[2])
+              }
+          }
+        }
+      end
+      
+		tree = KDTree.new(atoms_extended, 3)
+    atoms.each{|a|
+      r = 4
+      neighbors = tree.find([a.x-r, a.x+r], [a.y-r, a.y+r], [a.z-r, a.z+r])
+      neighbors.each{|n|
+        b = Bond.new(a, n)
+        @bonds << b if b.length < bond_length
+      }
+    }
 		
-		atom1 = stack.pop
-		while (not stack.empty?)
-			stack.each{|atom2|
-				b = Bond.new(atom1, atom2)
-				@bonds << b if b.length < bond_length
-				if periodic?
-				  lattice_vectors.each{|v|
-				    b = Bond.new(atom1, atom2.displace(v[0], v[1], v[2]))
-    				@bonds << b if b.length < bond_length
-				    b = Bond.new(atom1, atom2.displace(-1*v[0], -1*v[1], -1*v[2]))
-    				@bonds << b if b.length < bond_length
-				  }
-			  end
-			}
-			atom1 = stack.pop
-		end
+    # atom1 = stack.pop
+    # while (not stack.empty?)
+    #   stack.each{|atom2|
+    #     b = Bond.new(atom1, atom2)
+    #     @bonds << b if b.length < bond_length
+    #     if periodic?
+    #           v1 = lattice_vectors[0]
+    #           v2 = lattice_vectors[1]
+    #       [-1, 0, 1].each{|n1|
+    #         [-1, 0, 1].each{|n2|               
+    #               b = Bond.new(atom1, atom2.displace(n1*v1[0] + n2*v2[0], n1*v1[1] + n2*v2[1], n1*v1[2] + n2*v2[2]))
+    #               @bonds << b if b.length < bond_length
+    #         }
+    #       }
+    #     end
+    #   }
+    #   atom1 = stack.pop
+    # end
 	end
 
   # Return true if this geometry has lattice vectors defined
@@ -470,7 +494,7 @@ module Aims
       u.lattice_vectors = [Vector[nx.abs*v1[0], nx.abs*v1[1], nx.abs*v1[2]], 
                            Vector[ny.abs*v2[0], ny.abs*v2[1], ny.abs*v2[2]], 
                            Vector[nz.abs*v3[0], nz.abs*v3[1], nz.abs*v3[2]]]
-      u.make_bonds 
+      # u.make_bonds 
       return u     
     end
 
@@ -478,7 +502,7 @@ module Aims
     # Currently does no validation on lattice vectors on miller vectors
     def <<(aGeometry)
       self.atoms.concat(aGeometry.atoms)
-	  self.make_bonds
+    # self.make_bonds
 	  return self
     end
     
@@ -500,9 +524,9 @@ module Aims
     end
 
     # return a string in xyz format
-    def format_xyz
+    def format_xyz(title = "Aims Geoemtry")
       output = self.atoms.size.to_s + "\n"
-      output << "Aims Geometry \n"
+      output << "#{title} \n"
       self.atoms.each{ |a| 
         output << [a.species, a.x.to_s, a.y.to_s, a.z.to_s].join("\t") + "\n"
       }
@@ -578,17 +602,17 @@ module Aims
       border_atoms = {}
       
       # Move each atom behind all the planes
-      new_unit_cell.atoms(false).each do |atom|
+      new_unit_cell.atoms(false).each_with_index do |atom, i|
         planes_vecs.each_pair do |p, v|
           if p.distance_to_point(0,0,0) == 0
             # If the plane intersects the origin then 
             # move atoms not on the plane (inequality)
-            while p.distance_to_point(atom.x, atom.y, atom.z) > 0
+            while p.distance_to_point(atom.x, atom.y, atom.z) > 1e-4
               atom.displace!(v[0], v[1], v[2])
-            end            
+            end
           else
             # Move atoms that lie on the plane if the plane doesn't intersect the origin
-            while p.distance_to_point(atom.x, atom.y, atom.z) >= 0
+            while p.distance_to_point(atom.x, atom.y, atom.z) >= -1e-4
               atom.displace!(v[0], v[1], v[2])
             end
           end
@@ -606,6 +630,8 @@ module Aims
         end
       end
 
+      
+
       # Add more border atoms for each combination of lattice planes
       if repeat_border_atoms
         border_atoms.each_pair{|atom, planes|
@@ -622,7 +648,7 @@ module Aims
         }
       end
       new_unit_cell.atoms.uniq!
-      new_unit_cell.make_bonds
+      # new_unit_cell.make_bonds
       return new_unit_cell
 
     end

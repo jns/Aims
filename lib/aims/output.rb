@@ -247,7 +247,7 @@ module Aims
     end
     
     def final_geometry
-      self.geometry_steps.last.geometry
+        self.geometry_steps.last.geometry
     end
     
     def final_step
