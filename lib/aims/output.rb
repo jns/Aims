@@ -461,8 +461,9 @@ module Aims
               retval.geometry_steps << GeometryStep.new 
               retval.geometry_step.step_num = last_step_num + 1
               retval.geometry_step.geometry = OutputParser.parse_updated_geometry(f, n_atoms)
-            #  retval.geometry_step.geometry.lattice_vectors = vectors
-              
+              unless retval.geometry_step.geometry.lattice_vectors
+                retval.geometry_step.geometry.lattice_vectors = vectors
+              end
             when /\ Final\ atomic\ structure\:/
               retval.geometry_step.geometry = OutputParser.parse_updated_geometry(f, n_atoms)
              # retval.geometry_step.geometry.lattice_vectors = vectors

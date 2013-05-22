@@ -189,6 +189,7 @@ module Aims
   def add_plane(aPlane, recache = true)
     self.clip_planes << aPlane
     recache_visible_atoms if recache
+    aPlane
   end
 	
     # Add a clipping plane defined by the outward normal (h,k,l)
