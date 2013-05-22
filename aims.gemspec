@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   This gem offers support for parsing and generating geometry and control files, 
   and parsing output files for the FHI-AIMS DFT code.
 EOF
-  s.version = "0.2.0"
+  s.version = "0.3.0"
   s.executables = ["aims_output.rb", "aims_summary.rb"]
   s.test_files = Dir.glob("spec/*.rb")
   s.add_development_dependency 'rspec'
