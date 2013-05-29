@@ -427,11 +427,15 @@ module Aims
     
     # Return an Atom whose coordinates are the center of the unit-cell.
     def center(visible_only = true)
-      bounds = bounding_box(visible_only)
-      x = (bounds[0].x + bounds[1].x)/2.0
-      y = (bounds[0].y + bounds[1].y)/2.0
-      z = (bounds[0].z + bounds[1].z)/2.0
-      return Atom.new(x,y,z)
+      if atoms.empty?
+        return Atom.new(0,0,0)
+      else
+        bounds = bounding_box(visible_only)
+        x = (bounds[0].x + bounds[1].x)/2.0
+        y = (bounds[0].y + bounds[1].y)/2.0
+        z = (bounds[0].z + bounds[1].z)/2.0
+        return Atom.new(x,y,z)
+      end
     end
     
     # Yield to each atom in the unit cell
